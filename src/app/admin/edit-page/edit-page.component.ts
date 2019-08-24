@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {PostsService} from "../../shared/posts.service";
+import {switchMap} from "rxjs/operators";
+import {Post} from "../../shared/interfaces";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-edit-page',
@@ -9,15 +12,27 @@ import {PostsService} from "../../shared/posts.service";
 })
 export class EditPageComponent implements OnInit {
 
+  form : FormGroup
+
   constructor(
       private route: ActivatedRoute,
       private postService: PostsService
   ) { }
 
   ngOnInit() {
-    this.route.params.subscribe((params: Params) => {
-
+    this.route.params.pipe(
+        switchMap((params: Params) => {
+          return this.postService.getById(params['id'])
+        })
+    ).subscribe((post: Post) => {
+      this.form = new FormGroup({
+        title: new FormControl(post.title, Validators.required),
+        text: new FormControl(post.text, Validators.required),
+      })
     })
   }
 
+  submit() {
+
+  }
 }
